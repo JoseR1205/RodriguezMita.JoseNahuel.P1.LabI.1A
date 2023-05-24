@@ -22,9 +22,11 @@ def menu ():
             7. Guardar en formato JSON\n\
             8. Leer desde formato JSON\n\
             9. Actualizar precios\n\
-            10. Salir del programa")
+            10. Salir del programa\n\
+            11. Agregar nuevo producto a la Lista\n\
+            12. Guardar en .Json o CSV")
         opcion = int(input("ingresar opcion : "))
-        if (opcion >= 1 and opcion <= 10):
+        if (opcion >= 1 and opcion <= 12):
             os.system("cls")
             match opcion:
                 case 1:
@@ -52,6 +54,10 @@ def menu ():
                     cargarAumento(listaDeInsumos)
                 case 10:
                     break
+                case 11:
+                    listaDeInsumos.append(agregarProducto(listaDeInsumos))
+                case 12:
+                    guardarJsonORCSV(listaDeInsumos)
         input("Presione Enter para continuar...")
         os.system("cls")
 
@@ -311,3 +317,81 @@ def cargarAumento(listaInsumos):
         for aumentos in listaAumentado:
             archivo.write(str(aumentos["ID"])+ "," + str(aumentos["NOMBRE"]) + "," + str(aumentos["MARCA"])+ "," + str(aumentos["PRECIO"])+ "," + str(aumentos["CARACTERISTICAS"]))
    
+
+def agregarProducto(listaInsumos):
+    id = str(len(listaInsumos)+1)
+    insumoAux = {}
+    marcaUsuario = None
+    marca = None
+    print("Marcas Disponible:\n")
+    marcasD = cargarMarcasDisponible()
+    for marcas in marcasD:
+        print("__" + marcas)
+    while marca == None:
+        marcaUsuario = input("Ingresar Marca\n")
+        marca =  validarMarca(marcasD, marcaUsuario)
+    caracateristica = ingresarCaracteristicas()
+    nombre = input("ingresar Nombre\n") 
+    precio= "$" + input("ingresar precio\n")
+    insumoAux = {
+        "ID":id,
+        "NOMBRE":nombre,
+        "MARCA":marca,
+        "PRECIO":precio,
+        "CARACTERISTICAS":caracateristica
+    }
+    return insumoAux
+
+
+def ingresarCaracteristicas():
+    seguir = 0
+    caracteristica=[]
+    caracteristicaF = None
+    seguir = int(input("ingresar cantidad de caracteristicas 1 a 3\n"))
+    for x in range(seguir):
+        caracteristica.append(input("Ingresar caracteristica\n"))
+    match seguir:
+        case 1:
+            caracteristicaF = caracteristica[0]
+        case 2:
+            caracteristicaF = caracteristica[0] + "~"+caracteristica[1]
+        case 3:
+            caracteristicaF = caracteristica[0] + "~"+caracteristica[1] + "~" +caracteristica[2] 
+    return caracteristicaF
+
+def validarMarca(marcasD, marcaUsuario):
+    marcas = None
+    for marca in marcasD:
+        if marca == marcaUsuario:
+            marcas = marca
+    return marcas
+
+def cargarMarcasDisponible():
+    marcasDisponibles = []
+    archivo = open("marcas.txt","r")
+    for leer in archivo:
+        marcasDisponibles.append(str(archivo.readline()).replace("\n",""))
+    archivo.close
+    return marcasDisponibles
+
+def guardarJsonORCSV(listaInsumos):
+    elegir = int(input("Ingresar 1 para Json o otro numero para CSV\n"))
+    if elegir == 1:
+        nombreArchivo = input("Ingresar Nombre del archivo\n") + ".json"
+        guardarJsonActualizado(listaInsumos,nombreArchivo)
+    else:
+        nombreArchivo = input("Ingresar Nombre del archivo\n") + ".csv"
+        guardarCSVActualizado(listaInsumos, nombreArchivo)
+        
+def guardarJsonActualizado(listaInsumos,nombreArchivo):
+    with open(nombreArchivo,"w") as archivo:
+        json.dump(listaInsumos, archivo)
+
+def guardarCSVActualizado(listaInsumos, nombreArchivo):
+    with open(nombreArchivo, "w", encoding="utf-8") as archivo:
+        archivo.write("ID,NOMBRE,MARCA,PRECIO,CARACTERISTICAS\n")
+        for x in range(len(listaInsumos)) :
+            if x < 50 :
+                archivo.write(str(listaInsumos[x]["ID"])+ "," + str(listaInsumos[x]["NOMBRE"]) + "," + str(listaInsumos[x]["MARCA"])+ "," + str(listaInsumos[x]["PRECIO"])+ "," + str(listaInsumos[x]["CARACTERISTICAS"]))
+            else:
+                archivo.write("\n" + str(listaInsumos[x]["ID"])+ "," + str(listaInsumos[x]["NOMBRE"]) + "," + str(listaInsumos[x]["MARCA"])+ "," + str(listaInsumos[x]["PRECIO"])+ "," + str(listaInsumos[x]["CARACTERISTICAS"]) )                
